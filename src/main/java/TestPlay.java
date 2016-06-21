@@ -1,8 +1,8 @@
 import domain.Board;
-import io.AdventurerParser;
-import io.BoardParser;
-import io.impl.AdventurerParserImpl;
-import io.impl.BoardParserImpl;
+import io.AdventurerReader;
+import io.BoardReader;
+import io.impl.AdventurerReaderImpl;
+import io.impl.BoardReaderImpl;
 import services.Game;
 import services.impl.GameImpl;
 
@@ -16,25 +16,25 @@ public class TestPlay {
     public static void main(String[] args) {
 //        String fileName = readLine("Entrez le chemin et le nom du fichier décrivant le plateau : ");
         String fileName = "/Users/shn/test-board.txt";
-        BoardParser boardParser = new BoardParserImpl(fileName);
+        BoardReader boardReader = new BoardReaderImpl(fileName);
         try {
-            boardParser.parse();
+            boardReader.read();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Board board = new Board(boardParser.getBoardSize(), boardParser.getMountains(), boardParser.getTreasures());
+        Board board = new Board(boardReader.getBoardSize(), boardReader.getMountains(), boardReader.getTreasures());
 
 //        fileName = readLine("Entrez le chemin et le nom du fichier contenant l'inventaire des joueurs : ");
         fileName = "/Users/shn/test-adventurers.txt";
-        AdventurerParser adventurerParser = new AdventurerParserImpl(fileName);
+        AdventurerReader adventurerReader = new AdventurerReaderImpl(fileName);
         try {
-            adventurerParser.parse();
+            adventurerReader.read();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Game game = new GameImpl(board, adventurerParser.getAdventurers());
+        Game game = new GameImpl(board, adventurerReader.getAdventurers());
 
         game.play();
     }

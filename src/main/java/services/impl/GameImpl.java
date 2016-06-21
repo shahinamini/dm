@@ -88,7 +88,7 @@ public class GameImpl implements Game {
                 continue;
             }
 
-            square.letIn(adventurer);
+            square.setAdventurer(adventurer);
             this.playersStillPlaying.add(new PlayerImpl(adventurer, this));
             prompt(adventurer.getName() + " set at " + square.getCoordinates());
         }
@@ -102,7 +102,7 @@ public class GameImpl implements Game {
 
     public void play() {
         for (Player player : playersStillPlaying) {
-            Thread playerThread = new Thread(player);
+            Thread playerThread = new Thread(player, player.getName());
             playersThreads.add(playerThread);
             prompt(player.getName() + " has now a thread.");
         }
@@ -176,7 +176,7 @@ public class GameImpl implements Game {
         return squareAt(coordinates).getTreasures();
     }
 
-    public synchronized void pleaseMove(Player player, Coordinates position, Coordinates destination)
+    public synchronized void pleaseMoveWithCare(Player player, Coordinates position, Coordinates destination)
             throws GameException, InterruptedException {
         Square positionSquare = squareAt(position);
         Square destinationSquare = squareAt(destination);
@@ -188,7 +188,7 @@ public class GameImpl implements Game {
         if (destinationSquare.getMountain() != null)
             throw new GameException("Adventurer attempted to climb.");
 
-//        synchronized (this) {
+// Critical code starts
         while (destinationSquare.isOccupied()) {
             player.prompt("Waiting for " + destinationSquare.getOccupant().getName() + " to free " +
                     destination + " to go there.");
@@ -200,13 +200,13 @@ public class GameImpl implements Game {
             playerResumed(player);
         }
 
-        destinationSquare.letIn(adventurer);
+        destinationSquare.setAdventurer(adventurer);
         squareAt(position).letGo(adventurer);
 
         player.prompt("Went to " + destination + ".");
 
         notifyAll();
-//        }
+// Critical code ends
     }
 
     public void letOut(Adventurer adventurer, Coordinates coordinates) throws GameException {
@@ -218,7 +218,7 @@ public class GameImpl implements Game {
         square.clearOccupant();
     }
 
-    public void removeTreasuresAt(Coordinates coordinates) {
+    public void clearTreasuresAt(Coordinates coordinates) {
         squareAt(coordinates).clearTreasures();
     }
 

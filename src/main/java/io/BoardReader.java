@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by shn on 20/06/2016.
  */
-public interface BoardParser {
+public interface BoardReader {
 
     Coordinates getBoardSize();
 
@@ -16,5 +16,5 @@ public interface BoardParser {
 
     List<Coordinates> getMountains();
 
-    void parse() throws IOException;
+    void read() throws IOException;
 }

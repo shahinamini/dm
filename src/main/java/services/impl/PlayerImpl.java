@@ -2,10 +2,8 @@ package services.impl;
 
 import domain.*;
 import services.Game;
-import services.exceptions.GameException;
 
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
@@ -40,28 +38,19 @@ public class PlayerImpl implements services.Player {
     }
 
     public void run() {
-        boolean hasJustMoved = true;
-//        Square newSquare = game.squareAt(position);
+        boolean hasJustArrived = true;
         prompt("Starts at " + position + ".");
 
         while (!remainingMoves.isEmpty()) {
-//            if (newSquare != null) {
-            if (hasJustMoved) {
+            if (hasJustArrived) {
                 prompt("Looks for treasure in " + position + ".");
                 List<Treasure> currentSquareTreasures = game.getTreasuresAt(position);
                 if (!currentSquareTreasures.isEmpty()) {
                     prompt("Found treasure!");
                     treasuresFoundInThisGame.addAll(currentSquareTreasures);
-                    game.removeTreasuresAt(position);
+                    game.clearTreasuresAt(position);
 
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        finishGame();
-                        return;
-                    }
-
-                    hasJustMoved = false;
+                    hasJustArrived = false;
                     continue;
                 }
             }
@@ -69,112 +58,71 @@ public class PlayerImpl implements services.Player {
             switch (remainingMoves.get(0)) {
                 case LEFT:
                     orientation = orientation.left();
-                    prompt(remainingMoves.remove(0).toString());
-                    hasJustMoved = false;
+                    remainingMoves.remove(0);
+                    hasJustArrived = false;
                     prompt("Turned left.");
 
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        finishGame();
-                        return;
-                    }
-
-                    continue;
+                    break;
                 case RIGHT:
                     orientation = orientation.right();
-                    prompt(remainingMoves.remove(0).toString());
-                    hasJustMoved = false;
                     prompt("Turned right.");
 
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        finishGame();
-                        return;
-                    }
+                    remainingMoves.remove(0).toString();
 
-                    continue;
+                    hasJustArrived = false;
+                    break;
                 case FORWARD:
-                    Coordinates destinationCoordinates = forwardSquareCoordinates();
+                    Coordinates destination = forwardSquareCoordinates();
 
-//                    Square destinationSquare = game.squareAt(destinationCoordinates);
-                    prompt("Set to go to " + destinationCoordinates + ".");
+                    prompt("Set to go to " + destination + ".");
 
-//                    if (destinationSquare == null || destinationSquare.isMountain()) {
-                    if (!game.hasSquareAt(destinationCoordinates) || game.hasMountainAt(destinationCoordinates)) {
-                        prompt("Cannot go to " + destinationCoordinates + ", not a nice place.");
+                    if (!game.hasSquareAt(destination) || game.hasMountainAt(destination)) {
+                        prompt("Cannot go to " + destination + ", off board or mountain.");
 
                         do
-                            prompt(remainingMoves.remove(0).toString());
+                            remainingMoves.remove(0);
                         while (!remainingMoves.isEmpty() && remainingMoves.get(0) == Move.FORWARD);
 
-                        hasJustMoved = false;
-
+                        hasJustArrived = false;
                         continue;
                     }
 
                     try {
-                        game.pleaseMove(this, position, destinationCoordinates);
-                    } catch (Exception e) {
-                        if (e instanceof GameException)
-                            e.printStackTrace();
-                        if (e instanceof InterruptedException) {
-                            finishGame();
-                            return;
-                        }
-
-                    }
-
-/*
-                    MovementLock movementLock = MovementLock.getInstance();
-                    synchronized (movementLock) {
-                        while (destinationSquare.isOccupied()) {
-                            prompt("Waiting for " + destinationSquare.getOccupant().getName() + " to free " +
-                                    destinationCoordinates + " to go there.");
-                            try {
-                                game.playerWaiting(this);
-                                movementLock.wait();
-                                game.playerResumed(this);
-                            } catch (InterruptedException e) {
-                                finishGame();
-                                return;
-                            }
-                        }
-
-                        destinationSquare.letIn(adventurer);
-                        game.squareAt(position).letGo(adventurer);
-                        movementLock.notifyAll();
-                    }
-*/
-
-                    position = destinationCoordinates;
-                    prompt(remainingMoves.remove(0).toString());
-                    hasJustMoved = true;
-
-                    try {
-                        sleep(1000);
+                        game.pleaseMoveWithCare(this, position, destination);
                     } catch (InterruptedException e) {
                         finishGame();
                         return;
                     }
 
-                    continue;
+                    position = destination;
+
+                    remainingMoves.remove(0);
+
+                    hasJustArrived = true;
+                    break;
                 default:
                     throw new RuntimeException("This should never happen: " + adventurer.getName() +
                             " attempted an unknown move.");
+            }
+
+            prompt("-------------------------------");
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                finishGame();
+                return;
             }
         }
 
         prompt("No moves left.");
 
-        if (hasJustMoved) {
+        if (hasJustArrived) {
             prompt("Checking for treasure in the last square reached.");
             List<Treasure> currentSquareTreasures = game.getTreasuresAt(position);
             if (!currentSquareTreasures.isEmpty()) {
                 prompt("Found treasure!");
                 treasuresFoundInThisGame.addAll(currentSquareTreasures);
-                game.removeTreasuresAt(position);
+                game.clearTreasuresAt(position);
             }
         }
 

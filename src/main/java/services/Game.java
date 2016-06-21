@@ -34,11 +34,11 @@ public interface Game {
 
     List<Treasure> getTreasuresAt(Coordinates coordinates);
 
-    void pleaseMove(Player player, Coordinates position, Coordinates destination)
+    void pleaseMoveWithCare(Player player, Coordinates position, Coordinates destination)
             throws GameException, InterruptedException;
 
     void letOut(Adventurer adventurer, Coordinates coordinates) throws GameException;
 
-    void removeTreasuresAt(Coordinates coordinates);
+    void clearTreasuresAt(Coordinates coordinates);
 
 }

@@ -4,7 +4,7 @@ import domain.Adventurer;
 import domain.Coordinates;
 import domain.Move;
 import domain.Orientation;
-import io.AdventurerParser;
+import io.AdventurerReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +16,12 @@ import java.util.Scanner;
 /**
  * Created by shn on 20/06/2016.
  */
-public class AdventurerParserImpl implements AdventurerParser {
+public class AdventurerReaderImpl implements AdventurerReader {
 
     private String pathname;
     private List<Adventurer> adventurers;
 
-    public AdventurerParserImpl(String pathname) {
+    public AdventurerReaderImpl(String pathname) {
         this.pathname = pathname;
         this.adventurers = new ArrayList<Adventurer>();
     }
@@ -30,7 +30,7 @@ public class AdventurerParserImpl implements AdventurerParser {
         return adventurers;
     }
 
-    public void parse() throws IOException {
+    public void read() throws IOException {
         File boardFile = new File(pathname);
         Scanner scanner = new Scanner(boardFile);
         int lineNumber = 0;
@@ -41,9 +41,9 @@ public class AdventurerParserImpl implements AdventurerParser {
 
             System.out.println(lineNumber + ": " + line);
 
-            if (line.length() == 0) {
+            if (line.length() == 0 || line.startsWith("#")) {
                 System.out.println("Line number " + lineNumber + " ignored.");
-                System.out.println("Line is empty.");
+                System.out.println("Line is a comment or empty.");
                 continue;
             }
 

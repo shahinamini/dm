@@ -70,7 +70,7 @@ public class Square {
         return treasures;
     }
 
-    public void letIn(Adventurer adventurer) {
+    public void setAdventurer(Adventurer adventurer) {
         if (this.isMountain() || this.isOccupied())
             throw new RuntimeException(adventurer.getName() + " attempted to enter " +
                     (this.isMountain() ? "a mountain." : "a square occupied by " + occupant.getName() + "."));
