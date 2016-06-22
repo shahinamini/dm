@@ -1,13 +1,13 @@
 package services.impl;
 
 import domain.*;
-import domain.Board;
-import domain.Square;
+import io.ResultsWriter;
 import services.Game;
 import services.Player;
 import services.exceptions.GameException;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -16,11 +16,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class GameImpl implements Game {
     private final Square[][] squares;
     private final Board board;
-    private volatile List<Treasure> treasures;
-    private volatile List<Player> playersStillPlaying;
-    private volatile List<Player> playersWaiting;
-    private volatile List<Player> playersReported;
-    private volatile List<Thread> playersThreads;
+    private final List<Player> playersStillPlaying;
+    private final List<Player> playersWaiting;
+    private final List<Player> playersReported;
+    private final List<Thread> playersThreads;
 
     public GameImpl(Board board, List<Adventurer> players) {
         this.board = board;
@@ -45,7 +44,6 @@ public class GameImpl implements Game {
             prompt("Mountain at " + square.getCoordinates());
         }
 
-        this.treasures = new CopyOnWriteArrayList<Treasure>();
         for (Treasure treasure : board.getTreasures()) {
             Square square = squareAt(treasure.getCoordinates());
 
@@ -61,7 +59,6 @@ public class GameImpl implements Game {
             }
 
             square.addTreasure(treasure);
-            this.treasures.add(treasure);
             prompt("Treasure at " + square.getCoordinates());
         }
 
@@ -88,16 +85,16 @@ public class GameImpl implements Game {
                 continue;
             }
 
-            square.setAdventurer(adventurer);
+            square.setOccupant(adventurer);
             this.playersStillPlaying.add(new PlayerImpl(adventurer, this));
             prompt(adventurer.getName() + " set at " + square.getCoordinates());
         }
 
-        playersWaiting = new CopyOnWriteArrayList<Player>();
+        playersWaiting = new CopyOnWriteArrayList<>();
 
-        playersReported = new CopyOnWriteArrayList<Player>();
+        playersReported = new ArrayList<>();
 
-        playersThreads = new CopyOnWriteArrayList<Thread>();
+        playersThreads = new ArrayList<>();
     }
 
     public void play() {
@@ -111,6 +108,57 @@ public class GameImpl implements Game {
             prompt("Starting " + playerThread.getName());
             playerThread.start();
         }
+
+        for (Thread playerThread : playersThreads) {
+
+            try {
+                playerThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public List<Player> getResults() {
+        Comparator<Player> whoWins =
+                (Player p1, Player p2) -> p2.howManyTreasuresFound().compareTo(p1.howManyTreasuresFound()); //   JAVA 8!
+
+        Collections.sort(playersReported, whoWins);
+
+        return playersReported;
+    }
+
+    public synchronized void pleaseMoveWithCare(Player player, Coordinates position, Coordinates destination)
+            throws GameException, InterruptedException {
+        Square positionSquare = squareAt(position);
+        Square destinationSquare = squareAt(destination);
+        Adventurer adventurer = player.getAdventurer();
+
+        if (destinationSquare == null || positionSquare == null)
+            throw new GameException("Adventurer talks of nonexistent squares.");
+
+        if (destinationSquare.getMountain() != null)
+            throw new GameException("Adventurer attempted to climb.");
+
+// Critical code starts
+        while (destinationSquare.isOccupied()) {
+            prompt(player, "Waiting for " + destinationSquare.getOccupant().getName() + " to free " +
+                    destination + " to go there.");
+
+            letWait(player);
+
+            wait();
+
+            letResume(player);
+        }
+
+        destinationSquare.setOccupant(adventurer);
+        positionSquare.setOccupant(null);
+
+        prompt(player, "Went to " + destination + ".");
+
+        notifyAll();
+// Critical code ends
     }
 
     public void playerDone(Player player) {
@@ -128,7 +176,7 @@ public class GameImpl implements Game {
         }
     }
 
-    public void playerWaiting(Player player) {
+    private void letWait(Player player) {
         playersWaiting.add(player);
         prompt(player.getName() + " waiting...");
 
@@ -136,16 +184,16 @@ public class GameImpl implements Game {
             this.ends();
     }
 
-    public void playerResumed(Player player) {
+    private void letResume(Player player) {
         playersWaiting.remove(player);
         prompt(player.getName() + " not waiting anymore.");
     }
 
-    public void report(Player player) {
+    public synchronized void report(Player player) {
         playersReported.add(player);
     }
 
-    public boolean hasSquareAt(Coordinates coordinates) {
+    private boolean hasSquareAt(Coordinates coordinates) {
         int x = coordinates.getX(), y = coordinates.getY();
 
         return x > 0 && x <= this.board.getSize().getX() && y > 0 && y <= this.board.getSize().getY();
@@ -160,69 +208,27 @@ public class GameImpl implements Game {
         return null;
     }
 
-    public Adventurer getOccupantAt(Coordinates coordinates) {
-        return squareAt(coordinates).getOccupant();
+    public boolean isCrossableAt(Coordinates coordinates) {
+        return hasSquareAt(coordinates) && !squareAt(coordinates).isMountain();
     }
 
-    public boolean hasMountainAt(Coordinates coordinates) {
-        return squareAt(coordinates).getMountain() != null;
-    }
-
-    public boolean isOccupiedAt(Coordinates coordinates) {
-        return squareAt(coordinates).getOccupant() != null;
-    }
-
-    public List<Treasure> getTreasuresAt(Coordinates coordinates) {
+    public List<Treasure> getTreasuresAt(Coordinates coordinates) throws GameException {
+        if (!hasSquareAt(coordinates))
+            throw new GameException("Operation on nonexistent square requested.");
         return squareAt(coordinates).getTreasures();
     }
 
-    public synchronized void pleaseMoveWithCare(Player player, Coordinates position, Coordinates destination)
-            throws GameException, InterruptedException {
-        Square positionSquare = squareAt(position);
-        Square destinationSquare = squareAt(destination);
-        Adventurer adventurer = player.getAdventurer();
-
-        if (destinationSquare == null || positionSquare == null)
-            throw new GameException("Adventurer talks of nonexistent squares.");
-
-        if (destinationSquare.getMountain() != null)
-            throw new GameException("Adventurer attempted to climb.");
-
-// Critical code starts
-        while (destinationSquare.isOccupied()) {
-            player.prompt("Waiting for " + destinationSquare.getOccupant().getName() + " to free " +
-                    destination + " to go there.");
-
-            playerWaiting(player);
-
-            wait();
-
-            playerResumed(player);
-        }
-
-        destinationSquare.setAdventurer(adventurer);
-        squareAt(position).letGo(adventurer);
-
-        player.prompt("Went to " + destination + ".");
-
-        notifyAll();
-// Critical code ends
-    }
-
-    public void letOut(Adventurer adventurer, Coordinates coordinates) throws GameException {
-        Square square = squareAt(coordinates);
-
-        if (square.getOccupant() != adventurer)
-            throw new GameException("Adventurer attempted to leave a square he is not on.");
-
-        square.clearOccupant();
-    }
-
-    public void clearTreasuresAt(Coordinates coordinates) {
+    public void clearTreasuresAt(Coordinates coordinates) throws GameException {
+        if (!hasSquareAt(coordinates))
+            throw new GameException("Operation on nonexistent square requested.");
         squareAt(coordinates).clearTreasures();
     }
 
     private void prompt(String message) {
         System.out.println("GAME: " + message);
+    }
+
+    private static void prompt(Player player, String message) {
+        System.out.println(player.getName().toUpperCase() + ": " + message);
     }
 }

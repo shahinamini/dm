@@ -1,9 +1,8 @@
 package services;
 
-import domain.Adventurer;
 import domain.Coordinates;
-import domain.Square;
 import domain.Treasure;
+import io.ResultsWriter;
 import services.exceptions.GameException;
 
 import java.util.List;
@@ -14,31 +13,20 @@ import java.util.List;
 public interface Game {
 //    Square squareAt(Coordinates coordinates);
 
-    void playerDone(Player player);
-
-    void playerWaiting(Player player);
-
-    void playerResumed(Player player);
-
-    void report(Player player);
-
     void play();
 
-    boolean hasSquareAt(Coordinates coordinates);
-
-    Adventurer getOccupantAt(Coordinates coordinates);
-
-    boolean hasMountainAt(Coordinates coordinates);
-
-    boolean isOccupiedAt(Coordinates coordinates);
-
-    List<Treasure> getTreasuresAt(Coordinates coordinates);
+    List<Player> getResults();
 
     void pleaseMoveWithCare(Player player, Coordinates position, Coordinates destination)
             throws GameException, InterruptedException;
 
-    void letOut(Adventurer adventurer, Coordinates coordinates) throws GameException;
+    void playerDone(Player player);
 
-    void clearTreasuresAt(Coordinates coordinates);
+    void report(Player player);
 
+    boolean isCrossableAt(Coordinates coordinates);
+
+    List<Treasure> getTreasuresAt(Coordinates coordinates) throws GameException;
+
+    void clearTreasuresAt(Coordinates coordinates) throws GameException;
 }

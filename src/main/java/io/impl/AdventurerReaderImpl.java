@@ -9,7 +9,6 @@ import io.AdventurerReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -23,7 +22,7 @@ public class AdventurerReaderImpl implements AdventurerReader {
 
     public AdventurerReaderImpl(String pathname) {
         this.pathname = pathname;
-        this.adventurers = new ArrayList<Adventurer>();
+        this.adventurers = new ArrayList<>();
     }
 
     public List<Adventurer> getAdventurers() {
@@ -88,7 +87,7 @@ public class AdventurerReaderImpl implements AdventurerReader {
                     continue;
             }
 
-            List<Move> moves = new LinkedList<Move>();
+            List<Move> moves = new ArrayList<>();
             String movesString = lineContents[4].toUpperCase();
             for (int i = 0; i < movesString.length(); i++)
                 switch (lineContents[4].toUpperCase().charAt(i)) {
@@ -108,7 +107,6 @@ public class AdventurerReaderImpl implements AdventurerReader {
                         System.out.println("Line " + lineNumber + ": character '" + lineContents[4].charAt(i) +
                                 "' ignored.");
                         System.out.println("Not a valid move.");
-                        continue;
                 }
             adventurers.add(new Adventurer(name, position, orientation, moves));
 
@@ -121,6 +119,8 @@ public class AdventurerReaderImpl implements AdventurerReader {
                 System.out.print(" " + move);
             System.out.println(".");
         }
+
+        scanner.close();
     }
 }
 

@@ -1,5 +1,6 @@
 package io.impl;
 
+import domain.Board;
 import domain.Coordinates;
 import io.BoardReader;
 
@@ -15,26 +16,14 @@ import java.util.Scanner;
 public class BoardReaderImpl implements BoardReader {
     private String pathname;
     private Coordinates boardSize;
-    private List<Coordinates> treasures;
     private List<Coordinates> mountains;
+    private List<Coordinates> treasures;
 
     public BoardReaderImpl(String filename) {
         this.pathname = filename;
         this.boardSize = null;
-        this.treasures = new ArrayList<Coordinates>();
-        this.mountains = new ArrayList<Coordinates>();
-    }
-
-    public Coordinates getBoardSize() {
-        return boardSize;
-    }
-
-    public List<Coordinates> getTreasures() {
-        return treasures;
-    }
-
-    public List<Coordinates> getMountains() {
-        return mountains;
+        this.mountains = new ArrayList<>();
+        this.treasures = new ArrayList<>();
     }
 
     public void read() throws IOException {
@@ -121,5 +110,9 @@ public class BoardReaderImpl implements BoardReader {
                     System.out.println("Line number " + lineNumber + " ignored.");
             }
         }
+    }
+
+    public Board getBoard() {
+        return new Board(boardSize, mountains, treasures);
     }
 }

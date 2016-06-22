@@ -16,14 +16,14 @@ public class Adventurer {
     private final Coordinates initialPosition;
     private final Orientation initialOrientation;
     private final List<Move> moveQueue;
-    private List<Treasure> treasuresFound;
+    private final List<Treasure> treasuresFound;
 
     public Adventurer(String name, Coordinates initialPosition, Orientation initialOrientation, List<Move> moveQueue) {
         this.name = name;
         this.initialPosition = initialPosition;
         this.initialOrientation = initialOrientation;
         this.moveQueue = moveQueue;
-        this.treasuresFound = new ArrayList<Treasure>();
+        this.treasuresFound = new ArrayList<>();
     }
 
     public String getName() {
@@ -42,7 +42,7 @@ public class Adventurer {
         return moveQueue;
     }
 
-    void findsTreasure(Treasure treasure) {
-        treasuresFound.add(treasure);
+    public void addAllTreasures(List<Treasure> treasuresNewlyFound) {
+        this.treasuresFound.addAll(treasuresNewlyFound);
     }
 }

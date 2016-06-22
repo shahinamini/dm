@@ -1,5 +1,6 @@
 package io;
 
+import domain.Board;
 import domain.Coordinates;
 
 import java.io.IOException;
@@ -10,11 +11,7 @@ import java.util.List;
  */
 public interface BoardReader {
 
-    Coordinates getBoardSize();
-
-    List<Coordinates> getTreasures();
-
-    List<Coordinates> getMountains();
-
     void read() throws IOException;
+
+    Board getBoard();
 }

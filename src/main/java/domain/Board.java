@@ -19,19 +19,19 @@ public class Board {
     public Board(Coordinates size, List<Coordinates> mountainsCoordinates, List<Coordinates> treasuresCoordinates) {
         this.size = size;
 
-        this.mountains = new ArrayList<Mountain>();
+        this.mountains = new ArrayList<>();
         for (Coordinates mountainCoordinates : mountainsCoordinates)
             if (this.hasSquare(mountainCoordinates))
                 this.mountains.add(new Mountain(mountainCoordinates));
             else
-                System.out.println("Mountain at " + mountainCoordinates.toString() + " ignored: not on the board.");
+                System.out.println("Mountain at " + mountainCoordinates + " ignored: not on the board.");
 
-        this.treasures = new ArrayList<Treasure>();
+        this.treasures = new ArrayList<>();
         for (Coordinates treasureCoordinates : treasuresCoordinates)
             if (this.hasSquare(treasureCoordinates)) //                         CAN THERE BE TREASURES ON THE MOUNTAINS?
                 this.treasures.add(new Treasure(treasureCoordinates));
             else
-                System.out.println("Treasure at " + treasureCoordinates.toString() + " ignored: not on the board.");
+                System.out.println("Treasure at " + treasureCoordinates + " ignored: not on the board.");
     }
 
     public Coordinates getSize() {

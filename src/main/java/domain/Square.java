@@ -12,22 +12,26 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Square {
     private final Coordinates coordinates;
     private Mountain mountain;
-    private volatile List<Treasure> treasures;
+    private final List<Treasure> treasures;
     private volatile Adventurer occupant;
 
     public Square(Coordinates coordinates) {
         this.coordinates = coordinates;
         this.mountain = null;
-        this.treasures = new CopyOnWriteArrayList<Treasure>();
+        this.treasures = new CopyOnWriteArrayList<>();
         this.occupant = null;
+    }
+
+    public Coordinates getCoordinates() {
+        return coordinates;
     }
 
     public void setMountain(Mountain mountain) {
         this.mountain = mountain;
     }
 
-    public Coordinates getCoordinates() {
-        return coordinates;
+    public Mountain getMountain() {
+        return mountain;
     }
 
     public void addTreasure(Treasure treasure) {
@@ -38,54 +42,23 @@ public class Square {
         treasures.clear();
     }
 
-    public void setOccupant(Adventurer adventurer) {
-        if (this.isMountain() || this.isOccupied())
-            throw new RuntimeException(adventurer.getName() + " attempted to enter " +
-                    (this.isMountain() ? "a mountain." : "a square occupied by " + occupant.getName() + "."));
-
-        occupant = adventurer;
+    public List<Treasure> getTreasures() {
+        return treasures;
     }
 
-    public void clearOccupant() {
-        this.occupant = null;
+    public void setOccupant(Adventurer adventurer) {
+        occupant = adventurer;
     }
 
     public Adventurer getOccupant() {
         return occupant;
     }
 
-    public Mountain getMountain() {
-        return mountain;
-    }
-
     public boolean isMountain() {
         return (mountain != null);
     }
 
-    public synchronized boolean isOccupied() {
+    public boolean isOccupied() {
         return (occupant != null);
-    }
-
-    public synchronized List<Treasure> getTreasures() {
-        return treasures;
-    }
-
-    public void setAdventurer(Adventurer adventurer) {
-        if (this.isMountain() || this.isOccupied())
-            throw new RuntimeException(adventurer.getName() + " attempted to enter " +
-                    (this.isMountain() ? "a mountain." : "a square occupied by " + occupant.getName() + "."));
-
-        occupant = adventurer;
-    }
-
-    public void letGo(Adventurer adventurer) {
-        if (occupant != adventurer)
-            throw new RuntimeException(adventurer.getName() + " attempted to leave a square he is not on.");
-
-        occupant = null;
-    }
-
-    public void removeTreasures() {
-        treasures.clear();
     }
 }
