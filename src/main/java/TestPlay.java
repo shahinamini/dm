@@ -9,6 +9,7 @@ import services.Game;
 import services.Player;
 import services.impl.GameImpl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
@@ -19,8 +20,8 @@ import java.util.Scanner;
 public class TestPlay {
 
     public static void main(String[] args) {
-        String pathname = readLine("Entrez le chemin et le nom du fichier décrivant le plateau : ");
-//        String pathname = "/Users/shn/test-board.txt";
+//        String pathname = readLine("Entrez le chemin et le nom du fichier décrivant le plateau : ");
+        String pathname = "/Users/shn/test-board.txt";
 
         BoardReader boardReader = new BoardReaderImpl(pathname);
 
@@ -32,8 +33,8 @@ public class TestPlay {
 
         Board board = boardReader.getBoard();
 
-        pathname = readLine("Entrez le chemin et le nom du fichier contenant l'inventaire des joueurs : ");
-//        pathname = "/Users/shn/test-adventurers.txt";
+//        pathname = readLine("Entrez le chemin et le nom du fichier contenant l'inventaire des joueurs : ");
+        pathname = "/Users/shn/test-adventurers.txt";
 
         AdventurerReader adventurerReader = new AdventurerReaderImpl(pathname);
 
@@ -49,8 +50,8 @@ public class TestPlay {
 
         List<Player> results = game.getResults();
 
-        pathname = readLine("Dans quel fichier souhaitez-vous garder les résultats du jeu ? ");
-//        pathname = "/Users/shn/test-results.txt";
+//        pathname = readLine("Dans quel fichier souhaitez-vous garder les résultats du jeu ? ");
+        pathname = "/Users/shn/test-results.txt";
 
         try {
             ResultsWriter resultsWriter = new ResultsWriterImpl(pathname);
@@ -66,4 +67,5 @@ public class TestPlay {
         System.out.print(prompt);
         return new Scanner(System.in).next();
     }
+
 }

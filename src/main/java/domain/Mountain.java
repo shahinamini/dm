@@ -5,14 +5,20 @@ package domain;
  *
  * Created by shn on 20/06/2016.
  */
-public class Mountain {
-    private final Coordinates coordinates;
+public class Mountain implements AbstractSquare {
 
-    Mountain(Coordinates coordinates) {
-        this.coordinates = coordinates;
+    @Override
+    public boolean isCrossable() {
+        return false;
     }
 
-    public Coordinates getCoordinates() {
-        return coordinates;
+    @Override
+    public int getTreasures() {
+        return 0;
+    }
+
+    @Override
+    public Adventurer getAdventurer() {
+        return null;
     }
 }

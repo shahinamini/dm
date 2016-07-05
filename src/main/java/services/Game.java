@@ -11,7 +11,7 @@ import java.util.List;
  * Created by shn on 20/06/2016.
  */
 public interface Game {
-//    Square squareAt(Coordinates coordinates);
+//    OldSquare squareAt(Coordinates coordinates);
 
     void play();
 

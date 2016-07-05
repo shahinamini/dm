@@ -1,12 +1,10 @@
 package services.impl;
 
 import domain.*;
-import io.ResultsWriter;
 import services.Game;
 import services.Player;
 import services.exceptions.GameException;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -14,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by shn on 20/06/2016.
  */
 public class GameImpl implements Game {
-    private final Square[][] squares;
+    private final OldSquare[][] squares;
     private final Board board;
     private final List<Player> playersStillPlaying;
     private final List<Player> playersWaiting;
@@ -24,15 +22,15 @@ public class GameImpl implements Game {
     public GameImpl(Board board, List<Adventurer> players) {
         this.board = board;
 
-        this.squares = new Square[board.getSize().getX()][board.getSize().getY()];
+        this.squares = new OldSquare[board.getSize().getX()][board.getSize().getY()];
 
         for (int i = 0; i < board.getSize().getX(); i++)
             for (int j = 0; j < board.getSize().getY(); j++)
-                squares[i][j] = new Square(new Coordinates(i + 1, j + 1));
+                squares[i][j] = new OldSquare(new Coordinates(i + 1, j + 1));
 
 
         for (Mountain mountain : board.getMountains()) {
-            Square square = squareAt(mountain.getCoordinates());
+            OldSquare square = squareAt(mountain.getCoordinates());
 
             if (square == null) {
                 System.out.println("Mountain at " + mountain.getCoordinates().toString() + " ignored.");
@@ -45,7 +43,7 @@ public class GameImpl implements Game {
         }
 
         for (Treasure treasure : board.getTreasures()) {
-            Square square = squareAt(treasure.getCoordinates());
+            OldSquare square = squareAt(treasure.getCoordinates());
 
             if (square == null) {
                 System.out.println("Treasure at " + treasure.getCoordinates().toString() + " ignored.");
@@ -64,7 +62,7 @@ public class GameImpl implements Game {
 
         this.playersStillPlaying = new CopyOnWriteArrayList<Player>();
         for (Adventurer adventurer : players) {
-            Square square = squareAt(adventurer.getInitialPosition());
+            OldSquare square = squareAt(adventurer.getInitialPosition());
 
             if (square == null) {
                 System.out.println(adventurer.getName() + " ignored.");
@@ -110,7 +108,6 @@ public class GameImpl implements Game {
         }
 
         for (Thread playerThread : playersThreads) {
-
             try {
                 playerThread.join();
             } catch (InterruptedException e) {
@@ -130,8 +127,8 @@ public class GameImpl implements Game {
 
     public synchronized void pleaseMoveWithCare(Player player, Coordinates position, Coordinates destination)
             throws GameException, InterruptedException {
-        Square positionSquare = squareAt(position);
-        Square destinationSquare = squareAt(destination);
+        OldSquare positionSquare = squareAt(position);
+        OldSquare destinationSquare = squareAt(destination);
         Adventurer adventurer = player.getAdventurer();
 
         if (destinationSquare == null || positionSquare == null)
@@ -174,6 +171,7 @@ public class GameImpl implements Game {
         for (Thread playerThread : playersThreads) {
             playerThread.interrupt();
         }
+        playersThreads.clear();
     }
 
     private void letWait(Player player) {
@@ -199,7 +197,7 @@ public class GameImpl implements Game {
         return x > 0 && x <= this.board.getSize().getX() && y > 0 && y <= this.board.getSize().getY();
     }
 
-    private Square squareAt(Coordinates coordinates) {
+    private OldSquare squareAt(Coordinates coordinates) {
         int x = coordinates.getX(), y = coordinates.getY();
 
         if (x > 0 && x <= this.board.getSize().getX() && y > 0 && y <= this.board.getSize().getY())

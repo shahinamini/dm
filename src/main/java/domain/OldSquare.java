@@ -9,13 +9,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * Created by shn on 20/06/2016.
  */
-public class Square {
+public class OldSquare {
     private final Coordinates coordinates;
     private Mountain mountain;
     private final List<Treasure> treasures;
     private volatile Adventurer occupant;
 
-    public Square(Coordinates coordinates) {
+    public OldSquare(Coordinates coordinates) {
         this.coordinates = coordinates;
         this.mountain = null;
         this.treasures = new CopyOnWriteArrayList<>();
